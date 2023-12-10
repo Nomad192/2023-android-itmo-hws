@@ -7,6 +7,7 @@ import android.widget.RadioButton
 import android.widget.RadioGroup
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import java.lang.ref.WeakReference
 import kotlin.properties.Delegates
 
 class MainActivity : AppCompatActivity(R.layout.activity_main) {
@@ -43,8 +44,8 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
         progressBar = findViewById(R.id.progress_bar)
         textView = findViewById(R.id.text_view)
 
-        threadWorker = ThreadWorker(counter, updateUi, endUpdateUi, this)
-        rxWorker = RxWorker(counter, updateUi, endUpdateUi, this)
+        threadWorker = ThreadWorker(counter, updateUi, endUpdateUi, WeakReference(this))
+        rxWorker = RxWorker(counter, updateUi, endUpdateUi)
 
         progressBar.max = Counter.MAX
 

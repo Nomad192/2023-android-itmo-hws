@@ -1,6 +1,5 @@
 package ru.ok.itmo.example
 
-import android.app.Activity
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.disposables.Disposable
@@ -11,8 +10,7 @@ import java.util.concurrent.TimeUnit
 class RxWorker(
     private val counter: Counter,
     private val updateUi: (value: Int) -> Unit,
-    private val endUpdateUi: () -> Unit,
-    private val activity: Activity
+    private val endUpdateUi: () -> Unit
 ) : Worker {
     private lateinit var disposable: Disposable
 
@@ -22,7 +20,6 @@ class RxWorker(
             Observable.just(counter.value)
         }
             .subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
             .concatWith(
                 Observable.interval(time, TimeUnit.MILLISECONDS)
                     .takeWhile {
@@ -36,19 +33,16 @@ class RxWorker(
                         }
                     }
             )
+            .observeOn(AndroidSchedulers.mainThread())
             .subscribe(
                 { value ->
-                    activity.runOnUiThread {
-                        updateUi(value)
-                    }
+                    updateUi(value)
                 },
                 { error ->
                     System.err.println("Error: ${error.stackTrace}")
                 },
                 {
-                    activity.runOnUiThread {
-                        endUpdateUi()
-                    }
+                    endUpdateUi()
                 }
             )
     }
