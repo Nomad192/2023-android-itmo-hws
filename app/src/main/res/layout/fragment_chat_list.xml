@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/background"
-    tools:context=".chat_list.ChatListFragment">
+    tools:context=".ui.chat_list.ChatListFragment">
 
     <TextView
         android:layout_width="match_parent"

@@ -6,7 +6,7 @@
 
     android:layout_height="match_parent"
     android:background="@color/background"
-    tools:context=".login.login_fragment.LoginFragment">
+    tools:context=".ui.login.login_fragment.LoginFragment">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/navbar"

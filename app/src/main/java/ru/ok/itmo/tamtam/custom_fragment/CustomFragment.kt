@@ -25,7 +25,8 @@ open class CustomFragment : Fragment {
 
     private fun setColorIconsOnStatusBar(view: View) {
         val decorView = requireActivity().window.decorView
-        val backgroundColor = (view.background as? ColorDrawable)?.color ?: throw IllegalArgumentException("Set background color")
+        val backgroundColor = (view.background as? ColorDrawable)?.color
+            ?: throw IllegalArgumentException("Set background color")
 
         @Suppress("DEPRECATION")
         val systemUiVisibilityFlags =

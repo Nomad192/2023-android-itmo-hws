@@ -1,4 +1,4 @@
-package ru.ok.itmo.tamtam.login.login_fragment
+package ru.ok.itmo.tamtam.ui.login.login_fragment
 
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel

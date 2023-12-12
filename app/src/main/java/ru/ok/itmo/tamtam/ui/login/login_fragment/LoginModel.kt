@@ -1,4 +1,4 @@
-package ru.ok.itmo.tamtam.login.login_fragment
+package ru.ok.itmo.tamtam.ui.login.login_fragment
 
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject

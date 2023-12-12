@@ -1,4 +1,4 @@
-package ru.ok.itmo.tamtam.chat
+package ru.ok.itmo.tamtam.ui.chat
 
 import ru.ok.itmo.tamtam.server.ServerWorker
 

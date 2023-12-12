@@ -1,4 +1,4 @@
-package ru.ok.itmo.tamtam.start
+package ru.ok.itmo.tamtam.ui.start
 
 import android.os.Bundle
 import android.view.View

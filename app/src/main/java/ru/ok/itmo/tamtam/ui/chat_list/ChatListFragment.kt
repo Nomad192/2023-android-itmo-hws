@@ -1,4 +1,4 @@
-package ru.ok.itmo.tamtam.chat_list
+package ru.ok.itmo.tamtam.ui.chat_list
 
 import android.os.Bundle
 import android.util.Log
@@ -34,6 +34,7 @@ class ChatListFragment : CustomFragment(R.layout.fragment_chat_list) {
 
     companion object {
         const val ARG_CHANNELS = "channels"
+
         @Suppress("UNUSED")
         fun newInstance(channels: String) =
             ChatListFragment().apply {

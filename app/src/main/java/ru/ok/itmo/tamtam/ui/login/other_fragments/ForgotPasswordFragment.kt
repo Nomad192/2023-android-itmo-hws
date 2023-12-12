@@ -1,4 +1,4 @@
-package ru.ok.itmo.tamtam.login.other_fragments
+package ru.ok.itmo.tamtam.ui.login.other_fragments
 
 import ru.ok.itmo.tamtam.custom_fragment.CustomFragment
 import ru.ok.itmo.tamtam.R

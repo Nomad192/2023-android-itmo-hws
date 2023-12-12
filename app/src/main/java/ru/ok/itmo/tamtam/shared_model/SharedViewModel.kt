@@ -5,8 +5,8 @@ import androidx.lifecycle.ViewModel
 import androidx.navigation.NavController
 import org.koin.core.component.KoinComponent
 import ru.ok.itmo.tamtam.R
-import ru.ok.itmo.tamtam.start.SplashFragment
-import ru.ok.itmo.tamtam.start.SplashType
+import ru.ok.itmo.tamtam.ui.start.SplashFragment
+import ru.ok.itmo.tamtam.ui.start.SplashType
 
 class SharedViewModel : ViewModel(), KoinComponent {
     lateinit var navController: NavController
