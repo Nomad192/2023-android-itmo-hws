@@ -2,7 +2,6 @@ package ru.ok.itmo.tamtam.chat
 
 import android.content.Context
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
@@ -12,11 +11,11 @@ import androidx.lifecycle.lifecycleScope
 import com.google.gson.Gson
 import com.google.gson.JsonObject
 import kotlinx.coroutines.launch
+import ru.ok.itmo.tamtam.custom_fragment.CustomFragment
 import ru.ok.itmo.tamtam.R
-import ru.ok.itmo.tamtam.helper.Helper
 import ru.ok.itmo.tamtam.shared_model.SharedViewModel
 
-class ChatFragment : Fragment(R.layout.fragment_chat) {
+class ChatFragment : CustomFragment(R.layout.fragment_chat) {
     private lateinit var name: String
 
     private val sharedViewModel: SharedViewModel by viewModels(ownerProducer = { requireActivity() })
@@ -24,8 +23,6 @@ class ChatFragment : Fragment(R.layout.fragment_chat) {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
-        activity?.window?.let { Helper.setLightStatusBar(requireContext(), it) }
 
         arguments?.let {
             name =

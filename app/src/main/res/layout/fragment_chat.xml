@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/background"
     tools:context=".chat.ChatFragment">
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -101,10 +102,9 @@
 
             android:src="@drawable/icon_smile_24"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/fragment_chat_input_message"
-            />
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
         <EditText
             android:id="@+id/fragment_chat_input_message"
@@ -115,15 +115,14 @@
             android:layout_marginEnd="12dp"
 
 
+            android:text="Текст сообщения"
+            android:textSize="18sp"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintStart_toEndOf="@+id/fragment_chat_input_smile_icon"
             app:layout_constraintEnd_toStartOf="@+id/fragment_chat_input_attach_icon"
 
-            android:text="Текст сообщения"
+            app:layout_constraintStart_toEndOf="@+id/fragment_chat_input_smile_icon"
 
-            android:textSize="18sp"
-            />
+            app:layout_constraintTop_toTopOf="parent" />
 
         <ImageView
             android:id="@+id/fragment_chat_input_attach_icon"
@@ -134,10 +133,9 @@
 
             android:src="@drawable/icon_attach_24"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintStart_toEndOf="@+id/fragment_chat_input_message"
             app:layout_constraintEnd_toStartOf="@+id/fragment_chat_input_mic_icon"
-            />
+            app:layout_constraintStart_toEndOf="@+id/fragment_chat_input_message"
+            app:layout_constraintTop_toTopOf="parent" />
 
         <ImageView
             android:id="@+id/fragment_chat_input_mic_icon"
@@ -150,10 +148,9 @@
 
             android:src="@drawable/icon_mic_24"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintStart_toEndOf="@+id/fragment_chat_input_attach_icon"
             app:layout_constraintEnd_toEndOf="parent"
-            />
+            app:layout_constraintStart_toEndOf="@+id/fragment_chat_input_attach_icon"
+            app:layout_constraintTop_toTopOf="parent" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

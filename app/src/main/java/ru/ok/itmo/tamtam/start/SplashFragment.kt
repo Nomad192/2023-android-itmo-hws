@@ -4,13 +4,12 @@ import android.os.Bundle
 import android.view.View
 import android.widget.ProgressBar
 import android.widget.Toast
-import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
-import ru.ok.itmo.tamtam.helper.Helper
+import ru.ok.itmo.tamtam.custom_fragment.CustomFragment
 import ru.ok.itmo.tamtam.R
 
-class SplashFragment : Fragment(R.layout.fragment_splash) {
+class SplashFragment : CustomFragment(R.layout.fragment_splash) {
     private val viewModel: SplashViewModel by viewModels()
     private lateinit var type: SplashType
 
@@ -21,11 +20,10 @@ class SplashFragment : Fragment(R.layout.fragment_splash) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        @Suppress("DEPRECATION")
         type =
             arguments?.getSerializable(ARG_SPLASH_TYPE) as? SplashType
                 ?: throw IllegalArgumentException("I don't know splash type")
-
-        activity?.window?.let { Helper.setAccentStatusBar(requireContext(), it) }
 
         val progressBar = view.findViewById<ProgressBar>(R.id.progress_bar)
 

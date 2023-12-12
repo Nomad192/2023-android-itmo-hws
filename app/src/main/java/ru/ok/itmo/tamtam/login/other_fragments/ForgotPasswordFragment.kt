@@ -1,6 +1,6 @@
 package ru.ok.itmo.tamtam.login.other_fragments
 
-import androidx.fragment.app.Fragment
+import ru.ok.itmo.tamtam.custom_fragment.CustomFragment
 import ru.ok.itmo.tamtam.R
 
-class ForgotPasswordFragment : Fragment(R.layout.fragment_forgot_password)
+class ForgotPasswordFragment : CustomFragment(R.layout.fragment_forgot_password)
