@@ -2,19 +2,17 @@ package ru.ok.itmo.tamtam.token
 
 import android.content.Context
 import android.content.SharedPreferences
-import android.util.Log
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKeys
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flow
 import org.koin.core.component.KoinComponent
-import ru.ok.itmo.tamtam.helper.Helper
 import ru.ok.itmo.tamtam.server.ServerException
 import ru.ok.itmo.tamtam.server.ServerWorker
 
 sealed class AuthException : Exception() {
     data object Missing : AuthException()
+    data object NoNet : AuthException()
 }
 
 class TokenRepository : TokenModel(), KoinComponent {
@@ -29,6 +27,7 @@ class TokenRepository : TokenModel(), KoinComponent {
     fun init(context: Context) {
         this.context = context
 
+        @Suppress("DEPRECATION")
         sharedPreferences = EncryptedSharedPreferences.create(
             "secret_shared_prefs",
             MasterKeys.getOrCreate(MasterKeys.AES256_GCM_SPEC),
@@ -52,29 +51,27 @@ class TokenRepository : TokenModel(), KoinComponent {
     fun logout(): Flow<Unit> = flow {
         clearToken()
         ServerWorker.logout().collect {
-            Log.d(Helper.DEBUG_TAG, "logout: $it")
+            emit(Unit)
         }
-        emit(Unit)
     }
 
     fun checkAuthAndGetChannels(): Flow<String> = flow {
         val token = sharedPreferences.getString(TOKEN_KEY, DEFAULT_STRING)
+            ?: throw IllegalArgumentException("sharedPreferences is not init")
 
-        if (token != null && token != DEFAULT_STRING) {
-            this@TokenRepository.token = token
+        if (token == DEFAULT_TOKEN)
+            throw AuthException.Missing
 
+        this@TokenRepository.token = token
+
+        try {
             ServerWorker.getChannels().collect {
                 emit(it)
             }
-        } else
+        } catch (e: ServerException.Unauthorized) {
             throw AuthException.Missing
-    }.catch { e ->
-        when (e) {
-            AuthException.Missing -> throw e
-            ServerException.Unauthorized -> throw AuthException.Missing
+        } catch (e: ServerException.NoNet) {
+            throw AuthException.NoNet
         }
-
-        Log.d(Helper.DEBUG_TAG, "checkAuthAndGetChannels: $e")
-        throw e
     }
 }

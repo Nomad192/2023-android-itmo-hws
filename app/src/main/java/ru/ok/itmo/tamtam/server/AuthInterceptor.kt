@@ -4,19 +4,35 @@ import okhttp3.Interceptor
 import okhttp3.Response
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
+import retrofit2.HttpException
 import ru.ok.itmo.tamtam.token.TokenModel
-import java.io.IOException
+import java.net.UnknownHostException
+
+sealed class ServerException : Exception() {
+    data object Unauthorized : ServerException()
+    data object NoNet : ServerException()
+}
 
 class AuthInterceptor : Interceptor, KoinComponent {
     private val modelInstance: TokenModel by inject()
 
-    @Throws(IOException::class)
     override fun intercept(chain: Interceptor.Chain): Response {
         val originalRequest = chain.request()
 
-        val newRequest = originalRequest.newBuilder()
-            .header("X-Auth-Token", modelInstance.token)
-            .build()
-        return chain.proceed(newRequest)
+        val newRequest = if (requestsWithTokenSet.contains(originalRequest.url().encodedPath()))
+            originalRequest.newBuilder().header("X-Auth-Token", modelInstance.token).build()
+        else
+            originalRequest
+
+        try {
+            return chain.proceed(newRequest)
+        } catch (e: HttpException) {
+            when (e.code()) {
+                401 -> throw ServerException.Unauthorized
+                else -> throw e
+            }
+        } catch (e: UnknownHostException) {
+            throw ServerException.NoNet
+        }
     }
 }

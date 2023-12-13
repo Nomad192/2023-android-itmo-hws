@@ -55,8 +55,10 @@ class SplashViewModel : ViewModel(), KoinComponent {
                     SplashType.LOGOUT_TYPE -> logout()
                     SplashType.CHECK_TYPE -> checkAuthAndGetChannels()
                 }
-            } catch (e: AuthException) {
+            } catch (e: AuthException.Missing) {
                 sendToLogin()
+            } catch (e: AuthException.NoNet) {
+                sendToApp("???")
             } catch (e: Exception) {
                 Log.d(Helper.DEBUG_TAG, "getDirection: $e")
                 viewModelScope.launch(Dispatchers.Main) {
