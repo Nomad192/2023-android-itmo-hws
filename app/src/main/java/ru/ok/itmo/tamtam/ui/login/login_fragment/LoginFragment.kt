@@ -17,8 +17,8 @@ import androidx.navigation.fragment.findNavController
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 import ru.ok.itmo.tamtam.custom_fragment.CustomFragment
-import ru.ok.itmo.tamtam.helper.Helper
 import ru.ok.itmo.tamtam.R
+import ru.ok.itmo.tamtam.helper.setColor
 import ru.ok.itmo.tamtam.server.ServerException
 
 class LoginFragment : CustomFragment(R.layout.fragment_login) {
@@ -86,9 +86,7 @@ class LoginFragment : CustomFragment(R.layout.fragment_login) {
 
     private fun btnChangeState(state: Boolean) {
         btnLogin.isEnabled = state
-        Helper.setButtonColor(
-            btnLogin, requireContext(), if (state) R.color.buttons else R.color.disabled_button
-        )
+        btnLogin.setColor(requireContext(), if (state) R.color.buttons else R.color.disabled_button)
     }
 
     private fun btnLoginLogic() {
