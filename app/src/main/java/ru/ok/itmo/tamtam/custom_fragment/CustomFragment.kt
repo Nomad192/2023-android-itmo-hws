@@ -42,8 +42,12 @@ open class CustomFragment : Fragment {
     private fun setPaddingForStatusVar(view: View) {
         view.setOnApplyWindowInsetsListener { currentView, insets ->
             @Suppress("DEPRECATION")
-            val statusBarSize = insets.systemWindowInsetTop
-            currentView.setPadding(0, statusBarSize, 0, 0)
+            currentView.setPadding(
+                0,
+                insets.systemWindowInsetTop,
+                0,
+                insets.systemWindowInsetBottom
+            )
 
             return@setOnApplyWindowInsetsListener insets
         }
