@@ -6,19 +6,12 @@ import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.activity.OnBackPressedCallback
-import androidx.fragment.app.viewModels
-import androidx.lifecycle.lifecycleScope
-import com.google.gson.Gson
-import com.google.gson.JsonObject
-import kotlinx.coroutines.launch
 import ru.ok.itmo.tamtam.custom_fragment.CustomFragment
 import ru.ok.itmo.tamtam.R
-import ru.ok.itmo.tamtam.shared_model.SharedViewModel
+import ru.ok.itmo.tamtam.helper.closeAll
 
 class ChatFragment : CustomFragment(R.layout.fragment_chat) {
     private lateinit var name: String
-
-    private val sharedViewModel: SharedViewModel by viewModels(ownerProducer = { requireActivity() })
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -33,7 +26,8 @@ class ChatFragment : CustomFragment(R.layout.fragment_chat) {
         textView.text = "$name get data? wait"
 
         view.findViewById<ImageView>(R.id.arrow_left_back).setOnClickListener {
-            sharedViewModel.closeAll()
+            closeAll()
+            requireActivity().supportFragmentManager
         }
 
 //        lifecycleScope.launch {
@@ -61,7 +55,7 @@ class ChatFragment : CustomFragment(R.layout.fragment_chat) {
 
         val callback = object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
-                sharedViewModel.closeAll()
+                closeAll()
             }
         }
 
