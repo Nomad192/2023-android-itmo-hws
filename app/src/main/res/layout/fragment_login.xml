@@ -5,7 +5,8 @@
     android:layout_width="match_parent"
 
     android:layout_height="match_parent"
-    tools:context=".login.LoginFragment">
+    android:background="@color/background"
+    tools:context=".ui.login.login_fragment.LoginFragment">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/navbar"
@@ -32,7 +33,7 @@
             android:padding="12dp"
 
 
-            android:src="@drawable/icon_arrow_left"
+            android:src="@drawable/icon_arrow_left_24"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"

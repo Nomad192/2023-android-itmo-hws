@@ -1,4 +1,4 @@
-package ru.ok.itmo.tamtam.login
+package ru.ok.itmo.tamtam.ui.login.login_fragment
 
 import android.os.Bundle
 import android.view.KeyEvent
@@ -11,22 +11,19 @@ import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
 import androidx.core.widget.addTextChangedListener
-import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
-import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
-import kotlinx.coroutines.launch
-import ru.ok.itmo.tamtam.Helper
+import ru.ok.itmo.tamtam.custom_fragment.CustomFragment
 import ru.ok.itmo.tamtam.R
-import ru.ok.itmo.tamtam.SharedViewModel
+import ru.ok.itmo.tamtam.helper.setColor
+import ru.ok.itmo.tamtam.server.RequestUiState
 import ru.ok.itmo.tamtam.server.ServerException
 
-class LoginFragment : Fragment(R.layout.fragment_login) {
+class LoginFragment : CustomFragment(R.layout.fragment_login) {
     private val viewModel: LoginViewModel by viewModels()
-    private val sharedViewModel: SharedViewModel by viewModels(ownerProducer = { requireActivity() })
 
     private lateinit var editTextLogin: TextInputEditText
     private lateinit var editTextPassword: TextInputEditText
@@ -39,8 +36,6 @@ class LoginFragment : Fragment(R.layout.fragment_login) {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
-        activity?.window?.let { Helper.setLightStatusBar(requireContext(), it) }
 
         editTextLogin = view.findViewById(R.id.edit_text_login)
         editTextPassword = view.findViewById(R.id.edit_text_password)
@@ -68,17 +63,27 @@ class LoginFragment : Fragment(R.layout.fragment_login) {
     }
 
     private fun authorizationLogic() {
-        val tokenObserver = Observer<String> { token ->
-            successAuth(token)
+        viewModel.state.observe(
+            viewLifecycleOwner
+        ) {
+            when (it) {
+                is RequestUiState.Wait -> showLoading()
+                is RequestUiState.Success -> successAuth()
+                is RequestUiState.Error -> {
+                    when (val e = it.e) {
+                        ServerException.Unauthorized -> errorUnauthorized()
+                        ServerException.NoNet -> errorNoNet()
+                        else -> errorOther(e)
+                    }
+                    hideLoading()
+                }
+            }
         }
-        viewModel.token.observe(viewLifecycleOwner, tokenObserver)
     }
 
     private fun btnChangeState(state: Boolean) {
         btnLogin.isEnabled = state
-        Helper.setButtonColor(
-            btnLogin, requireContext(), if (state) R.color.buttons else R.color.disabled_button
-        )
+        btnLogin.setColor(requireContext(), if (state) R.color.buttons else R.color.disabled_button)
     }
 
     private fun btnLoginLogic() {
@@ -88,19 +93,7 @@ class LoginFragment : Fragment(R.layout.fragment_login) {
         viewModel.readyForAuthorization.observe(viewLifecycleOwner, enableObserver)
 
         btnLogin.setOnClickListener {
-            showLoading()
-            lifecycleScope.launch {
-                try {
-                    viewModel.authorization()
-                } catch (e: ServerException) {
-                    when (e) {
-                        ServerException.Unauthorized -> errorUnauthorized()
-                    }
-                } catch (e: Exception) {
-                    showToastInFragment(e.message ?: "Unknown error")
-                    hideLoading()
-                }
-            }
+            viewModel.authorization()
         }
     }
 
@@ -115,26 +108,35 @@ class LoginFragment : Fragment(R.layout.fragment_login) {
     }
 
     private fun errorUnauthorized() {
-        showToastInFragment(getString(R.string.error_unauthorized))
+        showToastInFragment(getString(R.string.error_unauthorized), Toast.LENGTH_LONG)
         textLayoutLogin.error = getString(R.string.error_unauthorized)
         textLayoutPassword.error = getString(R.string.error_unauthorized)
         hideLoading()
     }
 
-    private fun successAuth(token: String) {
-        sharedViewModel.login(token)
-        showToastInFragment(getString(R.string.success_auth))
-        findNavController().navigate(LoginFragmentDirections.actionFragmentLoginToAppNavGraph())
+    private fun errorNoNet() {
+        showToastInFragment(getString(R.string.error_nonet), Toast.LENGTH_LONG)
         hideLoading()
     }
 
-    private fun showToastInFragment(message: String) {
-        requireActivity().runOnUiThread {
-            Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
-        }
+    private fun errorOther(e: Throwable) {
+        showToastInFragment(
+            e.message ?: "Unknown error",
+            Toast.LENGTH_LONG
+        )
+    }
+
+    private fun successAuth() {
+        showToastInFragment(getString(R.string.success_auth), Toast.LENGTH_SHORT)
+        findNavController().navigate(LoginFragmentDirections.actionFragmentLoginToAppNavGraph())
+    }
+
+    private fun showToastInFragment(message: String, duration: Int) {
+        Toast.makeText(requireContext(), message, duration).show()
     }
 
     private fun keyboardLogic() {
+        @Suppress("DEPRECATION")
         activity?.window?.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE)
     }
 

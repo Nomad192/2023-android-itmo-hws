@@ -1,28 +1,29 @@
 package ru.ok.itmo.tamtam.server
 
-import android.util.Log
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.flowOn
-import retrofit2.HttpException
+import kotlinx.coroutines.flow.map
+import ru.ok.itmo.tamtam.server.dto.LoginRequest
 
-sealed class ServerException : Throwable() {
-    object Unauthorized : ServerException()
-}
+class ServerWorker(private val serverApi: ServerApi) {
 
-class ServerWorker {
+    fun login(login: String, password: String): Flow<String> {
+        return serverApi.login(LoginRequest(login, password)).map { it.string() }
+    }
+
+    fun getChannels(): Flow<List<String>> {
+        return serverApi.getChannels()
+    }
+
+    fun logout(): Flow<Unit> {
+        return serverApi.logout().map {  }
+    }
+
     companion object {
-        fun login(login: String, password: String): Flow<String> = flow {
-            val loginRequest = LoginRequest(name = login, pwd = password)
-            val responseBody = RetrofitClient.apiService.login(loginRequest)
-            val token = responseBody.string()
-            emit(token)
-        }.flowOn(Dispatchers.IO).catch { e ->
-            if (e is HttpException && e.code() == 401) throw ServerException.Unauthorized
-            Log.d("ServerWorker", "$e")
-            throw e
+        fun getInstance(): ServerWorker
+        {
+            val retrofit = RetrofitProvider.retrofit
+            val weatherApi = ServerApi.provideServerApi(retrofit)
+            return ServerWorker(weatherApi)
         }
     }
 }
