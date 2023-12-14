@@ -44,9 +44,9 @@ class TokenRepository : TokenModel(), KoinComponent {
         saveToken(DEFAULT_STRING)
     }
 
-    fun logout(): Flow<Unit> {
+    fun logout(): Flow<Unit> = serverWorker.logout()
+        .onStart {
         clearToken()
-        return serverWorker.logout()
     }
 
     fun checkAuthAndGetChannels(): Flow<List<String>> = serverWorker.getChannels()
@@ -54,7 +54,7 @@ class TokenRepository : TokenModel(), KoinComponent {
             val token = sharedPreferences.getString(TOKEN_KEY, DEFAULT_STRING)
                 ?: throw IllegalArgumentException("sharedPreferences is not init")
 
-            if (token == DEFAULT_TOKEN || token.isEmpty())
+            if (token == DEFAULT_TOKEN || token == DEFAULT_STRING)
                 throw ServerException.Unauthorized
 
             this@TokenRepository.token = token

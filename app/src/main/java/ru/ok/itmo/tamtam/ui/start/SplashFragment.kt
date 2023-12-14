@@ -35,9 +35,13 @@ class SplashFragment : CustomFragment(R.layout.fragment_splash) {
                     hideLoading()
                     findNavController().navigate((state as SplashViewModel.Success).direction)
                 }
+
                 is RequestUiState.Error -> {
                     hideLoading()
                     Toast.makeText(requireContext(), state.e.toString(), Toast.LENGTH_LONG).show()
+                    findNavController().navigate(
+                        SplashFragmentDirections.actionSplashFragmentToLoginNavGraph()
+                    )
                 }
             }
         }

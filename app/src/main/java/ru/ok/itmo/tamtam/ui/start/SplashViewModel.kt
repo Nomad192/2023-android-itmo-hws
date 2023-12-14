@@ -5,9 +5,12 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavDirections
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
@@ -37,19 +40,23 @@ class SplashViewModel : ViewModel(), KoinComponent {
     fun getDirection(type: SplashType) {
         viewModelScope.launch {
             when (type) {
-                SplashType.LOGOUT_TYPE -> logout()
+                SplashType.LOGOUT_TYPE -> logout(this)
                 SplashType.CHECK_TYPE -> checkAuthAndGetChannels()
             }
         }
     }
 
-    private suspend fun logout() {
+    private fun logout(coroutineScope: CoroutineScope) {
         tokenRepositoryInstance.logout()
             .flowOn(Dispatchers.IO)
             .catch {
-                errorHandler(it)
+                when (it) {
+                    is ServerException.NoNet -> sendToLogin()
+                    else -> _state.value = RequestUiState.Error(it)
+                }
             }
-            .collect { sendToLogin() }
+            .onStart { sendToLogin() }
+            .launchIn(coroutineScope)
     }
 
     private suspend fun checkAuthAndGetChannels() {
@@ -57,16 +64,12 @@ class SplashViewModel : ViewModel(), KoinComponent {
         tokenRepositoryInstance.checkAuthAndGetChannels()
             .flowOn(Dispatchers.IO)
             .catch {
-                errorHandler(it)
+                when (it) {
+                    is ServerException.Unauthorized -> sendToLogin()
+                    is ServerException.NoNet -> sendToApp("NoNet")
+                    else -> _state.value = RequestUiState.Error(it)
+                }
             }
             .collect { sendToApp(it.toString()) }
-    }
-
-    private fun errorHandler(e: Throwable) {
-        when (e) {
-            is ServerException.Unauthorized -> sendToLogin()
-            is ServerException.NoNet -> sendToApp("NoNet")
-            else -> _state.value = RequestUiState.Error(e)
-        }
     }
 }
