@@ -8,11 +8,6 @@ import retrofit2.HttpException
 import ru.ok.itmo.tamtam.token.TokenModel
 import java.net.UnknownHostException
 
-sealed class ServerException : Exception() {
-    data object Unauthorized : ServerException()
-    data object NoNet : ServerException()
-}
-
 class AuthInterceptor : Interceptor, KoinComponent {
     private val modelInstance: TokenModel by inject()
 
@@ -31,7 +26,8 @@ class AuthInterceptor : Interceptor, KoinComponent {
                 401 -> throw ServerException.Unauthorized
                 else -> throw e
             }
-        } catch (e: UnknownHostException) {
+        }
+        catch (e: UnknownHostException) {
             throw ServerException.NoNet
         }
     }

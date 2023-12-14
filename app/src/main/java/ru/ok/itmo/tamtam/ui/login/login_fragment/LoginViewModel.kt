@@ -4,40 +4,40 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.launch
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
+import ru.ok.itmo.tamtam.server.RequestUiState
+import ru.ok.itmo.tamtam.server.ServerWorker
+import ru.ok.itmo.tamtam.token.TokenRepository
 
-class LoginViewModel : ViewModel() {
+class LoginViewModel : ViewModel(), KoinComponent {
     var readyForAuthorization: MutableLiveData<Boolean> = MutableLiveData(false)
+    private val tokenRepositoryInstance: TokenRepository by inject()
+    private val serverWorker: ServerWorker by lazy { ServerWorker.getInstance() }
 
-    private var model: LoginModel = LoginModel()
     private var isLoginReady: Boolean = false
     private var isPasswordReady: Boolean = false
     private var login: String = ""
     private var password: String = ""
 
-    sealed class State {
-        data class Error(val e: Exception) : State()
-        data object Success : State()
-        data object Wait : State()
-    }
-
-    var state: MutableLiveData<State> = MutableLiveData()
+    var state: MutableLiveData<RequestUiState> = MutableLiveData()
 
     fun authorization() {
-        state.value = State.Wait
+        state.value = RequestUiState.Wait()
 
         viewModelScope.launch {
-            try {
-                model.authorization(login, password) {
-                    viewModelScope.launch(Dispatchers.Main) {
-                        state.value = State.Success
-                    }
+            serverWorker.login(login, password)
+                .flowOn(Dispatchers.IO)
+                .catch {
+                    state.value = RequestUiState.Error(it)
                 }
-            } catch (e: Exception) {
-                viewModelScope.launch(Dispatchers.Main) {
-                    state.value = State.Error(e)
+                .collect { token ->
+                    tokenRepositoryInstance.saveToken(token)
+                    state.value = RequestUiState.Success()
                 }
-            }
         }
     }
 

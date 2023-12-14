@@ -1,15 +1,16 @@
 package ru.ok.itmo.tamtam.server
 
-import com.google.gson.annotations.SerializedName
+import kotlinx.coroutines.flow.Flow
 import okhttp3.ResponseBody
+import retrofit2.Retrofit
 import retrofit2.http.Body
 import retrofit2.http.Headers
 import retrofit2.http.POST
 import retrofit2.http.GET
+import ru.ok.itmo.tamtam.server.dto.LoginRequest
 
 object Requests {
     const val LOGIN = "/login"
-    const val FIRST_CH = "/1ch"
     const val CHANNELS = "/channels"
     const val LOGOUT = "/logout"
 }
@@ -21,22 +22,17 @@ val requestsWithTokenSet: Set<String> = setOf(
 interface ServerApi {
     @POST(Requests.LOGIN)
     @Headers("Content-Type: application/json")
-    suspend fun login(@Body requestBody: LoginRequest): ResponseBody
-
-    @GET(Requests.FIRST_CH)
-    suspend fun getMessagesFrom1ch(): ResponseBody
+    fun login(@Body requestBody: LoginRequest): Flow<ResponseBody>
 
     @GET(Requests.CHANNELS)
-    suspend fun getChannels(): ResponseBody
+    fun getChannels(): Flow<List<String>>
 
     @POST(Requests.LOGOUT)
-    suspend fun logout(): ResponseBody
+    fun logout(): Flow<ResponseBody>
+
+    companion object {
+        fun provideServerApi(retrofit: Retrofit): ServerApi {
+            return retrofit.create(ServerApi::class.java)
+        }
+    }
 }
-
-data class LoginRequest(
-    @SerializedName("name")
-    val login: String,
-
-    @SerializedName("pwd")
-    val password: String
-)

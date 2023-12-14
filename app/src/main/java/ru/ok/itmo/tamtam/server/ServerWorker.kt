@@ -1,35 +1,29 @@
 package ru.ok.itmo.tamtam.server
 
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.map
+import ru.ok.itmo.tamtam.server.dto.LoginRequest
 
-class ServerWorker {
+class ServerWorker(private val serverApi: ServerApi) {
+
+    fun login(login: String, password: String): Flow<String> {
+        return serverApi.login(LoginRequest(login, password)).map { it.string() }
+    }
+
+    fun getChannels(): Flow<List<String>> {
+        return serverApi.getChannels()
+    }
+
+    fun logout(): Flow<Unit> {
+        return serverApi.logout().map {  }
+    }
+
     companion object {
-        fun login(login: String, password: String): Flow<String> = flow {
-            val loginRequest = LoginRequest(login = login, password = password)
-            val responseBody = RetrofitClient.apiService.login(loginRequest)
-            val token = responseBody.string()
-            emit(token)
-        }.flowOn(Dispatchers.IO)
-
-        fun getMessagesFrom1ch(): Flow<String> = flow {
-            val responseBody = RetrofitClient.apiService.getMessagesFrom1ch()
-            val result = responseBody.string()
-            emit(result)
-        }.flowOn(Dispatchers.IO)
-
-        fun getChannels(): Flow<String> = flow {
-            val responseBody = RetrofitClient.apiService.getChannels()
-            val result = responseBody.string()
-            emit(result)
-        }.flowOn(Dispatchers.IO)
-
-        fun logout(): Flow<String> = flow {
-            val responseBody = RetrofitClient.apiService.logout()
-            val result = responseBody.string()
-            emit(result)
-        }.flowOn(Dispatchers.IO)
+        fun getInstance(): ServerWorker
+        {
+            val retrofit = RetrofitProvider.retrofit
+            val weatherApi = ServerApi.provideServerApi(retrofit)
+            return ServerWorker(weatherApi)
+        }
     }
 }

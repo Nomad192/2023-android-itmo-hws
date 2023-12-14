@@ -19,6 +19,7 @@ import com.google.android.material.textfield.TextInputLayout
 import ru.ok.itmo.tamtam.custom_fragment.CustomFragment
 import ru.ok.itmo.tamtam.R
 import ru.ok.itmo.tamtam.helper.setColor
+import ru.ok.itmo.tamtam.server.RequestUiState
 import ru.ok.itmo.tamtam.server.ServerException
 
 class LoginFragment : CustomFragment(R.layout.fragment_login) {
@@ -66,17 +67,13 @@ class LoginFragment : CustomFragment(R.layout.fragment_login) {
             viewLifecycleOwner
         ) {
             when (it) {
-                LoginViewModel.State.Wait -> showLoading()
-                LoginViewModel.State.Success -> successAuth()
-                is LoginViewModel.State.Error -> {
-                    val error = it.e
-                    if (error is ServerException) {
-                        when (error) {
-                            ServerException.Unauthorized -> errorUnauthorized()
-                        }
-                    } else {
-                        showToastInFragment(error.message ?: "Unknown error", Toast.LENGTH_LONG)
-                        hideLoading()
+                is RequestUiState.Wait -> showLoading()
+                is RequestUiState.Success -> successAuth()
+                is RequestUiState.Error -> {
+                    when (val e = it.e) {
+                        ServerException.Unauthorized -> errorUnauthorized()
+                        ServerException.NoNet -> errorNoNet()
+                        else -> errorOther(e)
                     }
                     hideLoading()
                 }
@@ -115,6 +112,18 @@ class LoginFragment : CustomFragment(R.layout.fragment_login) {
         textLayoutLogin.error = getString(R.string.error_unauthorized)
         textLayoutPassword.error = getString(R.string.error_unauthorized)
         hideLoading()
+    }
+
+    private fun errorNoNet() {
+        showToastInFragment(getString(R.string.error_nonet), Toast.LENGTH_LONG)
+        hideLoading()
+    }
+
+    private fun errorOther(e: Throwable) {
+        showToastInFragment(
+            e.message ?: "Unknown error",
+            Toast.LENGTH_LONG
+        )
     }
 
     private fun successAuth() {

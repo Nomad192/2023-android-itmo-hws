@@ -8,10 +8,11 @@ import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import ru.ok.itmo.tamtam.custom_fragment.CustomFragment
 import ru.ok.itmo.tamtam.R
+import ru.ok.itmo.tamtam.server.RequestUiState
 
 class SplashFragment : CustomFragment(R.layout.fragment_splash) {
     private val viewModel: SplashViewModel by viewModels()
-    private lateinit var type: SplashType
+    private lateinit var progressBar: ProgressBar
 
     companion object {
         const val ARG_SPLASH_TYPE = "splashType"
@@ -21,17 +22,21 @@ class SplashFragment : CustomFragment(R.layout.fragment_splash) {
         super.onViewCreated(view, savedInstanceState)
 
         @Suppress("DEPRECATION")
-        type =
+        val type =
             arguments?.getSerializable(ARG_SPLASH_TYPE) as? SplashType
                 ?: throw IllegalArgumentException("I don't know splash type")
 
-        val progressBar = view.findViewById<ProgressBar>(R.id.progress_bar)
+        progressBar = view.findViewById(R.id.progress_bar)
 
         viewModel.state.observe(viewLifecycleOwner) { state ->
             when (state) {
-                is SplashViewModel.State.Success -> findNavController().navigate(state.direction)
-                is SplashViewModel.State.Error -> {
-                    progressBar.visibility = View.INVISIBLE
+                is RequestUiState.Wait -> showLoading()
+                is RequestUiState.Success -> {
+                    hideLoading()
+                    findNavController().navigate((state as SplashViewModel.Success).direction)
+                }
+                is RequestUiState.Error -> {
+                    hideLoading()
                     Toast.makeText(requireContext(), state.e.toString(), Toast.LENGTH_LONG).show()
                 }
             }
@@ -40,5 +45,13 @@ class SplashFragment : CustomFragment(R.layout.fragment_splash) {
         if (savedInstanceState == null) {
             viewModel.getDirection(type)
         }
+    }
+
+    private fun showLoading() {
+        progressBar.visibility = View.VISIBLE
+    }
+
+    private fun hideLoading() {
+        progressBar.visibility = View.INVISIBLE
     }
 }

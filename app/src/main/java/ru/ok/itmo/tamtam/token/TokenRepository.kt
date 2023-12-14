@@ -5,15 +5,10 @@ import android.content.SharedPreferences
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKeys
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.onStart
 import org.koin.core.component.KoinComponent
 import ru.ok.itmo.tamtam.server.ServerException
 import ru.ok.itmo.tamtam.server.ServerWorker
-
-sealed class AuthException : Exception() {
-    data object Missing : AuthException()
-    data object NoNet : AuthException()
-}
 
 class TokenRepository : TokenModel(), KoinComponent {
     companion object {
@@ -21,6 +16,7 @@ class TokenRepository : TokenModel(), KoinComponent {
         private const val DEFAULT_STRING = ""
     }
 
+    private val serverWorker: ServerWorker by lazy { ServerWorker.getInstance() }
     private lateinit var context: Context
     private lateinit var sharedPreferences: SharedPreferences
 
@@ -48,30 +44,19 @@ class TokenRepository : TokenModel(), KoinComponent {
         saveToken(DEFAULT_STRING)
     }
 
-    fun logout(): Flow<Unit> = flow {
+    fun logout(): Flow<Unit> {
         clearToken()
-        ServerWorker.logout().collect {
-            emit(Unit)
-        }
+        return serverWorker.logout()
     }
 
-    fun checkAuthAndGetChannels(): Flow<String> = flow {
-        val token = sharedPreferences.getString(TOKEN_KEY, DEFAULT_STRING)
-            ?: throw IllegalArgumentException("sharedPreferences is not init")
+    fun checkAuthAndGetChannels(): Flow<List<String>> = serverWorker.getChannels()
+        .onStart {
+            val token = sharedPreferences.getString(TOKEN_KEY, DEFAULT_STRING)
+                ?: throw IllegalArgumentException("sharedPreferences is not init")
 
-        if (token == DEFAULT_TOKEN)
-            throw AuthException.Missing
+            if (token == DEFAULT_TOKEN || token.isEmpty())
+                throw ServerException.Unauthorized
 
-        this@TokenRepository.token = token
-
-        try {
-            ServerWorker.getChannels().collect {
-                emit(it)
-            }
-        } catch (e: ServerException.Unauthorized) {
-            throw AuthException.Missing
-        } catch (e: ServerException.NoNet) {
-            throw AuthException.NoNet
+            this@TokenRepository.token = token
         }
-    }
 }

@@ -19,7 +19,6 @@ class ChatFragment : CustomFragment(R.layout.fragment_chat) {
     private lateinit var name: String
 
     private val sharedViewModel: SharedViewModel by viewModels(ownerProducer = { requireActivity() })
-    private val modelInstance: ChatModel = ChatModel()
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -37,23 +36,23 @@ class ChatFragment : CustomFragment(R.layout.fragment_chat) {
             sharedViewModel.closeAll()
         }
 
-        lifecycleScope.launch {
-            modelInstance.getMessage(object : OnDataReadyCallbackString {
-                override fun onDataReady(jsonString: String) {
-                    val gson = Gson()
-                    val jsonArray = gson.fromJson(jsonString, Array<JsonObject>::class.java)
-                    var result = ""
-                    for (jsonObject in jsonArray) {
-                        val from = jsonObject.getAsJsonPrimitive("from").asString
-                        val data = jsonObject.getAsJsonObject("data")
-
-                        result += "From: $from, Data: ${data.toString()}\n"
-                    }
-
-                    textView.text = result
-                }
-            })
-        }
+//        lifecycleScope.launch {
+//            modelInstance.getMessage(object : OnDataReadyCallbackString {
+//                override fun onDataReady(jsonString: String) {
+//                    val gson = Gson()
+//                    val jsonArray = gson.fromJson(jsonString, Array<JsonObject>::class.java)
+//                    var result = ""
+//                    for (jsonObject in jsonArray) {
+//                        val from = jsonObject.getAsJsonPrimitive("from").asString
+//                        val data = jsonObject.getAsJsonObject("data")
+//
+//                        result += "From: $from, Data: ${data.toString()}\n"
+//                    }
+//
+//                    textView.text = result
+//                }
+//            })
+//        }
     }
 
 
